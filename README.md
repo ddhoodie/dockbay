@@ -4,9 +4,9 @@ Pojednostavljeni registar Docker slika. Veb-aplikacija u kojoj korisnici objavlj
 
 ## Tim
 
-- ime (GitHub: user)
-- ime (GitHub: user)
-- ime (GitHub: user)
+- Veljko Joksović R2 33/2026 (vjoksovic)
+- Uroš Đošić R2 23/2026 (nerongerik)
+- Viktor Srbljin R2 2/2026 (ddhoodie)
 
 ## Pokretanje
 
