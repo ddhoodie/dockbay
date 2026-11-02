@@ -16,9 +16,12 @@ Pojednostavljeni registar Docker slika. Veb-aplikacija u kojoj korisnici objavlj
 py -m venv .venv
 .venv\Scripts\Activate.ps1
 py -m pip install -r requirements.txt
+py manage.py migrate
 py manage.py test
 py manage.py runserver
 ```
+
+Pri prvom `migrate` nastaje nalog `superadmin`. Lozinka je u `superadmin_password.txt` u korenu projekta. Pri prvoj prijavi mora da se promeni. Dok se ne promeni, ostale stranice su zatvorene. Posle promene, samo taj nalog može da doda drugog administratora na http://127.0.0.1:8000/administrators/new/
 
 Health provera: http://127.0.0.1:8000/health/
 

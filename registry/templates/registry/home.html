@@ -1,0 +1,14 @@
+{% extends "registry/base.html" %}
+
+{% block title %}dockbay{% endblock %}
+
+{% block content %}
+  {% if user.is_authenticated %}
+    <p>Prijavljen si kao {{ user.username }}.</p>
+    {% if user.is_superuser %}
+      <p><a href="{% url 'create_administrator' %}">Novi administrator</a></p>
+    {% endif %}
+  {% else %}
+    <p>Prijavi se da bi koristio dockbay.</p>
+  {% endif %}
+{% endblock %}
