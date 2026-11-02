@@ -10,4 +10,14 @@ Pojednostavljeni registar Docker slika. Veb-aplikacija u kojoj korisnici objavlj
 
 ## Pokretanje
 
-Dolazi sa prvom funkcionalnošću.
+```powershell
+py -m venv .venv
+.venv\Scripts\Activate.ps1
+py -m pip install -r requirements.txt
+py manage.py test
+py manage.py runserver
+```
+
+Health provera: http://127.0.0.1:8000/health/
+
+Testovi se pokreću i na svakom pull requestu ka `develop` (`.github/workflows/pr-develop.yml`). Lokalno i u CI aplikacija koristi SQLite jer je `UKS_TEST_DB` podrazumevano `ON`.
