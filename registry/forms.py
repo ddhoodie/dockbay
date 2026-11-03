@@ -1,5 +1,7 @@
 from django import forms
 from django.contrib.auth import get_user_model
+
+from registry.models import Repository
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.core.exceptions import ValidationError
@@ -52,3 +54,41 @@ class RegisterForm(UsernamePasswordForm):
         if password and confirmation and password != confirmation:
             self.add_error("password_confirmation", "Passwords do not match.")
         return cleaned
+
+
+class RepositoryCreateForm(forms.ModelForm):
+    class Meta:
+        model = Repository
+        fields = ["name", "description", "visibility"]
+        labels = {
+            "name": "Name",
+            "description": "Description",
+            "visibility": "Visibility",
+        }
+
+    def __init__(self, owner, *args, **kwargs):
+        self.owner = owner
+        super().__init__(*args, **kwargs)
+
+    def clean_name(self):
+        name = self.cleaned_data["name"]
+        if Repository.objects.filter(owner=self.owner, name=name).exists():
+            raise ValidationError("You already have a repository with this name.")
+        return name
+
+    def save(self, commit=True):
+        repository = super().save(commit=False)
+        repository.owner = self.owner
+        if commit:
+            repository.save()
+        return repository
+
+
+class RepositorySettingsForm(forms.ModelForm):
+    class Meta:
+        model = Repository
+        fields = ["description", "visibility"]
+        labels = {
+            "description": "Description",
+            "visibility": "Visibility",
+        }

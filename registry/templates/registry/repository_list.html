@@ -1,0 +1,33 @@
+{% extends "registry/base.html" %}
+
+{% block title %}Repositories{% endblock %}
+
+{% block content %}
+  <h1>Repositories</h1>
+  <p><a href="{% url 'repository_create' %}">New repository</a></p>
+  <form method="get">
+    <p>
+      <label for="name">Name</label>
+      <input id="name" name="name" value="{{ name }}">
+    </p>
+    <p>
+      <label for="visibility">Visibility</label>
+      <select id="visibility" name="visibility">
+        <option value="">All</option>
+        <option value="public" {% if visibility == "public" %}selected{% endif %}>Public</option>
+        <option value="private" {% if visibility == "private" %}selected{% endif %}>Private</option>
+      </select>
+    </p>
+    <button type="submit">Filter</button>
+  </form>
+  <ul>
+    {% for repository in repositories %}
+      <li>
+        <a href="{% url 'repository_detail' repository.owner.username repository.name %}">{{ repository.full_name }}</a>
+        ({{ repository.visibility }})
+      </li>
+    {% empty %}
+      <li>No repositories.</li>
+    {% endfor %}
+  </ul>
+{% endblock %}
