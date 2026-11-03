@@ -4,7 +4,7 @@ from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm
 from django.http import HttpResponse, HttpResponseForbidden
 from django.shortcuts import redirect, render
 
-from registry.forms import CreateAdministratorForm
+from registry.forms import CreateAdministratorForm, RegisterForm
 from registry.health import health_status
 from registry.models import User
 
@@ -15,6 +15,20 @@ def health(request):
 
 def home(request):
     return render(request, "registry/home.html")
+
+
+def register(request):
+    if request.user.is_authenticated:
+        return redirect(_after_login(request.user))
+
+    form = RegisterForm(request.POST or None)
+    if request.method == "POST" and form.is_valid():
+        User.objects.create_user(
+            username=form.cleaned_data["username"],
+            password=form.cleaned_data["password"],
+        )
+        return redirect("login")
+    return render(request, "registry/register.html", {"form": form})
 
 
 def login_view(request):

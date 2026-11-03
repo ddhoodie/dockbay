@@ -14,6 +14,7 @@
       </form>
     {% else %}
       <a href="{% url 'login' %}">Prijava</a>
+      <a href="{% url 'register' %}">Registracija</a>
     {% endif %}
   </p>
   {% block content %}{% endblock %}
