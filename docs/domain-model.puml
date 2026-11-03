@@ -1,0 +1,101 @@
+@startuml dockbay-domain
+skinparam classAttributeIconSize 0
+title dockbay domain model
+
+enum Role {
+  ordinary
+  administrator
+  superadmin
+}
+
+enum Visibility {
+  public
+  private
+}
+
+enum AccessLevel {
+  read
+  write
+  admin
+}
+
+class User {
+  username : String
+  email : String
+  displayName : String
+  bio : String
+  role : Role
+  mustChangePassword : Boolean
+  verifiedPublisher : Boolean
+  sponsoredOss : Boolean
+}
+
+class Organization {
+  name : String
+  description : String
+  image : String
+}
+
+class Team {
+  name : String
+  description : String
+}
+
+class TeamAccess {
+  level : AccessLevel
+}
+
+class Repository {
+  name : String
+  description : String
+  visibility : Visibility
+  official : Boolean
+}
+
+class Tag {
+  name : String
+  author : String
+  createdAt : DateTime
+}
+
+User "1" --> "0..*" Organization : owns
+User "0..*" -- "0..*" Organization : member
+
+Organization "1" *-- "0..*" Team
+Team "0..*" -- "0..*" User : includes
+
+User "0..1" --> "0..*" Repository : personal owner
+Organization "0..1" --> "0..*" Repository : organization owner
+
+Repository "1" *-- "0..*" Tag
+
+Team "0..*" -- "0..*" Repository
+(Team, Repository) .. TeamAccess
+
+User "0..*" -- "0..*" Repository : stars
+
+note bottom of Repository
+  Exactly one owner: a User or an Organization.
+  An official repository has no name prefix.
+  official = true means the Docker Official Image badge.
+  Deleting a repository deletes its tags.
+end note
+
+note bottom of User
+  verifiedPublisher and sponsoredOss are badges
+  shown on that user's public repositories.
+  stars is a bonus association.
+  A user may star only a public repository
+  they do not own and that does not belong
+  to an organization they belong to.
+end note
+
+note bottom of Team
+  Every team member is already
+  a member of the team's organization.
+  read: view the repository.
+  write: push a tag and delete tags.
+  admin: manage the repository.
+end note
+
+@enduml
