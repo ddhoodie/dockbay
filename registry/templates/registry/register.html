@@ -1,0 +1,13 @@
+{% extends "registry/base.html" %}
+
+{% block title %}Registracija{% endblock %}
+
+{% block content %}
+  <h1>Registracija</h1>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Napravi nalog</button>
+  </form>
+  <p><a href="{% url 'login' %}">Već imaš nalog? Prijavi se.</a></p>
+{% endblock %}
