@@ -4,7 +4,7 @@
 
 {% block content %}
   {% if user.is_authenticated %}
-    <p>Prijavljen si kao {{ user.username }}.</p>
+    <p>Prijavljen si kao {{ user.username }} ({{ account_role }}).</p>
     {% if user.is_superuser %}
       <p><a href="{% url 'create_administrator' %}">Novi administrator</a></p>
     {% endif %}
