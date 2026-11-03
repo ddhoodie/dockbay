@@ -10,8 +10,8 @@ class AccountRoleTests(TestCase):
         ordinary = User(username="milan")
         administrator = User(username="ana", is_staff=True)
 
-        self.assertEqual(account_role(AnonymousUser()), "neautentifikovan")
-        self.assertEqual(account_role(ordinary), "običan korisnik")
+        self.assertEqual(account_role(AnonymousUser()), "anonymous")
+        self.assertEqual(account_role(ordinary), "ordinary user")
         self.assertEqual(account_role(administrator), "administrator")
         self.assertNotEqual(account_role(ordinary), account_role(administrator))
 
@@ -29,8 +29,8 @@ class LoginLogoutTests(TestCase):
         self.assertRedirects(response, "/")
         home = self.client.get("/")
         self.assertContains(home, "milan")
-        self.assertContains(home, "običan korisnik")
-        self.assertNotContains(home, "Novi administrator")
+        self.assertContains(home, "ordinary user")
+        self.assertNotContains(home, "New administrator")
 
     def test_wrong_password_is_rejected(self):
         response = self.client.post(
@@ -50,8 +50,8 @@ class LoginLogoutTests(TestCase):
         self.client.post("/logout/")
         home = self.client.get("/")
 
-        self.assertContains(home, "Prijavi se")
-        self.assertNotContains(home, "Prijavljen si kao milan")
+        self.assertContains(home, "Log in")
+        self.assertNotContains(home, "Signed in as milan")
 
     def test_administrator_is_not_offered_superadmin_actions(self):
         User.objects.create_user(
@@ -66,4 +66,4 @@ class LoginLogoutTests(TestCase):
 
         home = self.client.get("/")
         self.assertContains(home, "administrator")
-        self.assertNotContains(home, "Novi administrator")
+        self.assertNotContains(home, "New administrator")

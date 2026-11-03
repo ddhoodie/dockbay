@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="sr">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <title>{% block title %}dockbay{% endblock %}</title>
@@ -10,11 +10,11 @@
     {% if user.is_authenticated %}
       <form method="post" action="{% url 'logout' %}" style="display: inline">
         {% csrf_token %}
-        <button type="submit">Odjava</button>
+        <button type="submit">Log out</button>
       </form>
     {% else %}
-      <a href="{% url 'login' %}">Prijava</a>
-      <a href="{% url 'register' %}">Registracija</a>
+      <a href="{% url 'login' %}">Log in</a>
+      <a href="{% url 'register' %}">Register</a>
     {% endif %}
   </p>
   {% block content %}{% endblock %}

@@ -1,6 +1,6 @@
 def account_role(user):
     if not getattr(user, "is_authenticated", False):
-        return "neautentifikovan"
+        return "anonymous"
     if user.is_superuser or user.is_staff:
         return "administrator"
-    return "običan korisnik"
+    return "ordinary user"
