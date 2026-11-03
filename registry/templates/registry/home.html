@@ -5,6 +5,7 @@
 {% block content %}
   {% if user.is_authenticated %}
     <p>Signed in as {{ user.username }} ({{ account_role }}).</p>
+    <p><a href="{% url 'profile' user.username %}">Profile</a></p>
     {% if user.is_superuser %}
       <p><a href="{% url 'create_administrator' %}">New administrator</a></p>
     {% endif %}

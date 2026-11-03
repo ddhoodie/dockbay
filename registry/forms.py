@@ -24,6 +24,17 @@ class UsernamePasswordForm(forms.Form):
         return password
 
 
+class ProfileForm(forms.ModelForm):
+    class Meta:
+        model = get_user_model()
+        fields = ["display_name", "email", "bio"]
+        labels = {
+            "display_name": "Display name",
+            "email": "Email",
+            "bio": "Bio",
+        }
+
+
 class CreateAdministratorForm(UsernamePasswordForm):
     pass
 
