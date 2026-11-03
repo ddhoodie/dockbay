@@ -52,7 +52,7 @@ class RegistrationTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(User.objects.filter(username="milan").count(), 1)
-        self.assertContains(response, "Korisničko ime je zauzeto.")
+        self.assertContains(response, "That username is taken.")
 
     def test_signed_in_user_is_sent_home(self):
         User.objects.create_user(username="milan", password="milan-pass-1")

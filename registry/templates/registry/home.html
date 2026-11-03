@@ -4,11 +4,11 @@
 
 {% block content %}
   {% if user.is_authenticated %}
-    <p>Prijavljen si kao {{ user.username }}.</p>
+    <p>Signed in as {{ user.username }} ({{ account_role }}).</p>
     {% if user.is_superuser %}
-      <p><a href="{% url 'create_administrator' %}">Novi administrator</a></p>
+      <p><a href="{% url 'create_administrator' %}">New administrator</a></p>
     {% endif %}
   {% else %}
-    <p>Prijavi se da bi koristio dockbay, ili napravi nalog.</p>
+    <p>Log in to use dockbay, or create an account.</p>
   {% endif %}
 {% endblock %}

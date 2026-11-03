@@ -58,7 +58,7 @@ def change_password(request):
 @login_required
 def create_administrator(request):
     if not request.user.is_superuser:
-        return HttpResponseForbidden("Samo superadmin može da doda administratora.")
+        return HttpResponseForbidden("Only the superadmin can add an administrator.")
 
     form = CreateAdministratorForm(request.POST or None)
     created = False
