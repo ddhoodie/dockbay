@@ -7,11 +7,13 @@ from registry.views import (
     health,
     home,
     login_view,
+    profile,
     register,
 )
 
 urlpatterns = [
     path("", home, name="home"),
+    path("users/<str:username>/", profile, name="profile"),
     path("health/", health, name="health"),
     path("login/", login_view, name="login"),
     path("register/", register, name="register"),

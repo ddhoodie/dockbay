@@ -2,9 +2,9 @@ from django.contrib.auth import login, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm
 from django.http import HttpResponse, HttpResponseForbidden
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
 
-from registry.forms import CreateAdministratorForm, RegisterForm
+from registry.forms import CreateAdministratorForm, ProfileForm, RegisterForm
 from registry.health import health_status
 from registry.models import User
 
@@ -15,6 +15,23 @@ def health(request):
 
 def home(request):
     return render(request, "registry/home.html")
+
+
+@login_required
+def profile(request, username):
+    subject = get_object_or_404(User, username=username)
+    if request.method == "POST" and request.user != subject:
+        return HttpResponseForbidden("You can edit only your own profile.")
+
+    form = ProfileForm(request.POST or None, instance=subject)
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        return redirect("profile", username=subject.username)
+    return render(
+        request,
+        "registry/profile.html",
+        {"subject": subject, "form": form, "can_edit": request.user == subject},
+    )
 
 
 def register(request):

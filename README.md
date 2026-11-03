@@ -10,6 +10,10 @@ Pojednostavljeni registar Docker slika. Veb-aplikacija u kojoj korisnici objavlj
 - Viktor Srbljin R2 2/2026 (ddhoodie)
 
 
+## Model
+
+Početni dijagram klasa je u [docs/domain-model.puml](docs/domain-model.puml). Dopunjava se kako model bude rastao.
+
 ## Pokretanje
 
 ```powershell
