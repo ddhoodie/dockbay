@@ -1,0 +1,12 @@
+{% extends "registry/base.html" %}
+
+{% block title %}Prijava{% endblock %}
+
+{% block content %}
+  <h1>Prijava</h1>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Prijavi se</button>
+  </form>
+{% endblock %}

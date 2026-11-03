@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 import os
+import sys
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -47,11 +48,18 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'registry.middleware.MustChangePasswordMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
 ROOT_URLCONF = 'dockbay.urls'
+
+AUTH_USER_MODEL = "registry.User"
+LOGIN_URL = "login"
+LOGOUT_REDIRECT_URL = "login"
+SUPERADMIN_PASSWORD_FILE = BASE_DIR / "superadmin_password.txt"
+SKIP_SUPERADMIN_BOOTSTRAP = "test" in sys.argv
 
 TEMPLATES = [
     {
