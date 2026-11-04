@@ -7,6 +7,8 @@ from registry.repository_views import (
     repository_detail,
     repository_list,
     repository_settings,
+    tag_create,
+    tag_delete,
 )
 from registry.views import (
     change_password,
@@ -33,6 +35,16 @@ urlpatterns = [
         "repositories/<str:username>/<str:name>/delete/",
         repository_delete,
         name="repository_delete",
+    ),
+    path(
+        "repositories/<str:username>/<str:name>/tags/new/",
+        tag_create,
+        name="tag_create",
+    ),
+    path(
+        "repositories/<str:username>/<str:name>/tags/<str:tag>/delete/",
+        tag_delete,
+        name="tag_delete",
     ),
     path("health/", health, name="health"),
     path("login/", login_view, name="login"),
