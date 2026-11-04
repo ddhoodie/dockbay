@@ -1,6 +1,13 @@
 from django.contrib.auth.views import LogoutView
 from django.urls import path
 
+from registry.repository_views import (
+    repository_create,
+    repository_delete,
+    repository_detail,
+    repository_list,
+    repository_settings,
+)
 from registry.views import (
     change_password,
     create_administrator,
@@ -14,6 +21,19 @@ from registry.views import (
 urlpatterns = [
     path("", home, name="home"),
     path("users/<str:username>/", profile, name="profile"),
+    path("repositories/", repository_list, name="repository_list"),
+    path("repositories/new/", repository_create, name="repository_create"),
+    path("repositories/<str:username>/<str:name>/", repository_detail, name="repository_detail"),
+    path(
+        "repositories/<str:username>/<str:name>/settings/",
+        repository_settings,
+        name="repository_settings",
+    ),
+    path(
+        "repositories/<str:username>/<str:name>/delete/",
+        repository_delete,
+        name="repository_delete",
+    ),
     path("health/", health, name="health"),
     path("login/", login_view, name="login"),
     path("register/", register, name="register"),
