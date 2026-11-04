@@ -1,0 +1,35 @@
+{% extends "registry/base.html" %}
+
+{% block title %}Explore{% endblock %}
+
+{% block content %}
+  <h1>Explore</h1>
+  <form method="get">
+    <p>
+      <label for="q">Search</label>
+      <input id="q" name="q" value="{{ query }}">
+    </p>
+    <p>
+      <label for="badge">Badge</label>
+      <select id="badge" name="badge">
+        <option value="">All</option>
+        {% for value, label in badges.items %}
+          <option value="{{ value }}" {% if badge == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </p>
+    <button type="submit">Search</button>
+  </form>
+  <ul>
+    {% for repository in repositories %}
+      <li>
+        <a href="{% url 'repository_detail' repository.owner.username repository.name %}">{{ repository.full_name }}</a>
+        {% for badge in repository.badges %}
+          {{ badge }}
+        {% endfor %}
+      </li>
+    {% empty %}
+      <li>No repositories.</li>
+    {% endfor %}
+  </ul>
+{% endblock %}

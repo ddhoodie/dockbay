@@ -36,7 +36,6 @@ def repository_create(request):
     return render(request, "registry/repository_form.html", {"form": form})
 
 
-@login_required
 def repository_detail(request, username, name):
     repository = _visible_repository(request, username, name)
     tag_name = request.GET.get("name", "").strip()
