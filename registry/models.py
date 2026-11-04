@@ -43,3 +43,34 @@ class Repository(models.Model):
     @property
     def full_name(self):
         return f"{self.owner.username}/{self.name}"
+
+
+class Tag(models.Model):
+    repository = models.ForeignKey(
+        Repository,
+        on_delete=models.CASCADE,
+        related_name="tags",
+    )
+    name = models.CharField(
+        max_length=128,
+        validators=[
+            RegexValidator(
+                r"^[A-Za-z0-9_][A-Za-z0-9_.-]{0,127}$",
+                "Use letters, digits, and . _ -, starting with a letter, digit, or _.",
+            )
+        ],
+    )
+    author = models.CharField(max_length=150)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["repository", "name"],
+                name="unique_tag_name_per_repository",
+            )
+        ]
+        ordering = ["name"]
+
+    def __str__(self):
+        return f"{self.repository.full_name}:{self.name}"

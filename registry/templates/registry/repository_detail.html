@@ -10,4 +10,36 @@
     <p><a href="{% url 'repository_settings' repository.owner.username repository.name %}">Settings</a></p>
     <p><a href="{% url 'repository_delete' repository.owner.username repository.name %}">Delete</a></p>
   {% endif %}
+  <h2>Tags</h2>
+  {% if repository.owner_id == user.id %}
+    <p><a href="{% url 'tag_create' repository.owner.username repository.name %}">New push</a></p>
+  {% endif %}
+  <form method="get">
+    <p>
+      <label for="tag-name">Name</label>
+      <input id="tag-name" name="name" value="{{ name }}">
+    </p>
+    <p>
+      <label for="sort">Sort</label>
+      <select id="sort" name="sort">
+        <option value="name" {% if sort == "name" %}selected{% endif %}>Name</option>
+        <option value="created" {% if sort == "created" %}selected{% endif %}>Newest</option>
+      </select>
+    </p>
+    <button type="submit">Apply</button>
+  </form>
+  <ul>
+    {% for tag in tags %}
+      <li>
+        {{ repository.full_name }}:{{ tag.name }}
+        by {{ tag.author }}
+        <time datetime="{{ tag.created_at|date:'c' }}">{{ tag.created_at|date:"Y-m-d H:i" }}</time>
+        {% if repository.owner_id == user.id %}
+          <a href="{% url 'tag_delete' repository.owner.username repository.name tag.name %}">Delete</a>
+        {% endif %}
+      </li>
+    {% empty %}
+      <li>No tags.</li>
+    {% endfor %}
+  </ul>
 {% endblock %}

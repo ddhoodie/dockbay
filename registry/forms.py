@@ -1,10 +1,11 @@
 from django import forms
 from django.contrib.auth import get_user_model
-
-from registry.models import Repository
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.core.exceptions import ValidationError
+from django.core.validators import RegexValidator
+
+from registry.models import Repository, Tag
 
 
 class UsernamePasswordForm(forms.Form):
@@ -92,3 +93,43 @@ class RepositorySettingsForm(forms.ModelForm):
             "description": "Description",
             "visibility": "Visibility",
         }
+
+
+class TagPushForm(forms.Form):
+    image_name = forms.CharField(max_length=406, label="Image name")
+    author = forms.CharField(max_length=150, label="Author")
+    tag = forms.CharField(max_length=128, label="Tag")
+
+    def __init__(self, repository, *args, **kwargs):
+        self.repository = repository
+        super().__init__(*args, **kwargs)
+        self.fields["image_name"].initial = repository.full_name
+
+    def clean_image_name(self):
+        image_name = self.cleaned_data["image_name"].strip()
+        if image_name != self.repository.full_name:
+            raise ValidationError("That image name does not match this repository.")
+        return image_name
+
+    def clean_author(self):
+        author = self.cleaned_data["author"].strip()
+        if not author:
+            raise ValidationError("Enter an author.")
+        return author
+
+    def clean_tag(self):
+        name = self.cleaned_data["tag"].strip()
+        RegexValidator(
+            r"^[A-Za-z0-9_][A-Za-z0-9_.-]{0,127}$",
+            "Use letters, digits, and . _ -, starting with a letter, digit, or _.",
+        )(name)
+        if Tag.objects.filter(repository=self.repository, name=name).exists():
+            raise ValidationError("This repository already has this tag.")
+        return name
+
+    def save(self):
+        return Tag.objects.create(
+            repository=self.repository,
+            name=self.cleaned_data["tag"],
+            author=self.cleaned_data["author"],
+        )
