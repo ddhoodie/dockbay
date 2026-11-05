@@ -7,6 +7,8 @@ class User(AbstractUser):
     display_name = models.CharField(max_length=150, blank=True)
     bio = models.TextField(blank=True)
     must_change_password = models.BooleanField(default=False)
+    verified_publisher = models.BooleanField(default=False)
+    sponsored_oss = models.BooleanField(default=False)
 
 
 class Repository(models.Model):
@@ -30,6 +32,7 @@ class Repository(models.Model):
     )
     description = models.CharField(max_length=255)
     visibility = models.CharField(max_length=7, choices=Visibility.choices)
+    official = models.BooleanField(default=False)
 
     class Meta:
         constraints = [
@@ -43,6 +46,21 @@ class Repository(models.Model):
     @property
     def full_name(self):
         return f"{self.owner.username}/{self.name}"
+
+    @property
+    def star_count(self):
+        return 0
+
+    @property
+    def badges(self):
+        labels = []
+        if self.official:
+            labels.append("Docker Official Image")
+        if self.owner.verified_publisher:
+            labels.append("Verified Publisher")
+        if self.owner.sponsored_oss:
+            labels.append("Sponsored OSS")
+        return labels
 
 
 class Tag(models.Model):
