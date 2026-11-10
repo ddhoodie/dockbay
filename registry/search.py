@@ -1,4 +1,5 @@
 from django.db.models import Case, IntegerField, Q, Value, When
+from django.db.models.functions import Coalesce
 
 from registry.models import Repository, User
 
@@ -20,8 +21,9 @@ def search_ordinary_users(query):
 def search_public_repositories(query, badge=""):
     repositories = Repository.objects.filter(
         visibility=Repository.Visibility.PUBLIC,
-        owner__isnull=False,
-    ).select_related("owner")
+    ).select_related("owner", "organization").annotate(
+        namespace=Coalesce("owner__username", "organization__name"),
+    )
     if badge == "official":
         repositories = repositories.filter(official=True)
     elif badge == "verified":
@@ -30,11 +32,12 @@ def search_public_repositories(query, badge=""):
         repositories = repositories.filter(owner__sponsored_oss=True)
     query = query.strip()
     if not query:
-        return repositories.order_by("owner__username", "name")
+        return repositories.order_by("namespace", "name")
     return (
         repositories.filter(
             Q(name__icontains=query)
             | Q(owner__username__icontains=query)
+            | Q(organization__name__icontains=query)
             | Q(description__icontains=query)
         )
         .annotate(
@@ -45,5 +48,5 @@ def search_public_repositories(query, badge=""):
                 output_field=IntegerField(),
             )
         )
-        .order_by("-relevance", "owner__username", "name")
+        .order_by("-relevance", "namespace", "name")
     )

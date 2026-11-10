@@ -11,6 +11,13 @@ from registry.organization_views import (
     organization_settings,
 )
 from registry.repository_views import (
+    organization_repository_create,
+    organization_repository_delete,
+    organization_repository_detail,
+    organization_repository_list,
+    organization_repository_settings,
+    organization_tag_create,
+    organization_tag_delete,
     repository_create,
     repository_delete,
     repository_detail,
@@ -58,6 +65,41 @@ urlpatterns = [
         "organizations/<str:name>/deactivate/",
         organization_deactivate,
         name="organization_deactivate",
+    ),
+    path(
+        "organizations/<str:name>/repositories/",
+        organization_repository_list,
+        name="organization_repository_list",
+    ),
+    path(
+        "organizations/<str:name>/repositories/new/",
+        organization_repository_create,
+        name="organization_repository_create",
+    ),
+    path(
+        "organizations/<str:name>/repositories/<str:repository_name>/",
+        organization_repository_detail,
+        name="organization_repository_detail",
+    ),
+    path(
+        "organizations/<str:name>/repositories/<str:repository_name>/settings/",
+        organization_repository_settings,
+        name="organization_repository_settings",
+    ),
+    path(
+        "organizations/<str:name>/repositories/<str:repository_name>/delete/",
+        organization_repository_delete,
+        name="organization_repository_delete",
+    ),
+    path(
+        "organizations/<str:name>/repositories/<str:repository_name>/tags/new/",
+        organization_tag_create,
+        name="organization_tag_create",
+    ),
+    path(
+        "organizations/<str:name>/repositories/<str:repository_name>/tags/<str:tag>/delete/",
+        organization_tag_delete,
+        name="organization_tag_delete",
     ),
     path("organizations/<str:name>/teams/", team_list, name="team_list"),
     path("organizations/<str:name>/teams/new/", team_create, name="team_create"),

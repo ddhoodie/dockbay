@@ -540,10 +540,12 @@ class TeamRegressionTests(TestCase):
         self.assertFalse(TeamRepositoryPermission.objects.exists())
         self.assertFalse(Repository.objects.exists())
 
-    def test_explore_and_badges_ignore_organization_repositories_without_crashing(self):
+    def test_explore_includes_organization_repositories_without_user_badges(self):
         owner = User.objects.create_user(username="milan", password="milan-pass-1")
         organization = create_organization(owner, "dockbay")
         organization_repository = create_organization_repository(organization)
+        organization_repository.visibility = Repository.Visibility.PUBLIC
+        organization_repository.save()
         personal = Repository.objects.create(
             owner=owner,
             name="personal",
@@ -554,4 +556,4 @@ class TeamRegressionTests(TestCase):
         self.assertEqual(organization_repository.badges, [])
         response = self.client.get("/explore/")
         self.assertContains(response, personal.full_name)
-        self.assertNotContains(response, organization_repository.full_name)
+        self.assertContains(response, organization_repository.full_name)
