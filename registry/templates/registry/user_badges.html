@@ -1,0 +1,35 @@
+{% extends "registry/base.html" %}
+
+{% block title %}User badges{% endblock %}
+
+{% block content %}
+  <h1>User badges</h1>
+  {% if assigned %}
+    <p>Badge assigned.</p>
+  {% endif %}
+  <form method="get">
+    <p>
+      <label for="q">Username</label>
+      <input id="q" name="q" value="{{ query }}">
+    </p>
+    <button type="submit">Search</button>
+  </form>
+  {{ form.user.errors }}
+  {{ form.badge.errors }}
+  <ul>
+    {% for subject in users %}
+      <li>
+        {{ subject.username }}
+        <form method="post" style="display: inline">
+          {% csrf_token %}
+          <input type="hidden" name="q" value="{{ query }}">
+          <input type="hidden" name="user" value="{{ subject.pk }}">
+          <button type="submit" name="badge" value="verified_publisher">Assign Verified Publisher</button>
+          <button type="submit" name="badge" value="sponsored_oss">Assign Sponsored OSS</button>
+        </form>
+      </li>
+    {% empty %}
+      <li>No users.</li>
+    {% endfor %}
+  </ul>
+{% endblock %}
