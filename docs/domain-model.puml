@@ -33,7 +33,7 @@ class User {
 class Organization {
   name : String
   description : String
-  image : String
+  image : Image
 }
 
 class Team {
@@ -60,6 +60,13 @@ class Tag {
 
 User "1" --> "0..*" Organization : owns
 User "0..*" -- "0..*" Organization : member
+
+note bottom of Organization
+  The name is globally unique.
+  The owner is always also a member.
+  Deleting the owner deletes the organization.
+  Deleting the organization removes its memberships.
+end note
 
 Organization "1" *-- "0..*" Team
 Team "0..*" -- "0..*" User : includes
