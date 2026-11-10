@@ -1,10 +1,16 @@
 {% extends "registry/base.html" %}
 
-{% block title %}Repositories{% endblock %}
+{% block title %}{% if organization %}{{ organization.name }} repositories{% else %}Repositories{% endif %}{% endblock %}
 
 {% block content %}
-  <h1>Repositories</h1>
-  <p><a href="{% url 'repository_create' %}">New repository</a></p>
+  <h1>{% if organization %}{{ organization.name }} repositories{% else %}Repositories{% endif %}</h1>
+  <p>
+    {% if organization %}
+      <a href="{% url 'organization_repository_create' organization.name %}">New repository</a>
+    {% else %}
+      <a href="{% url 'repository_create' %}">New repository</a>
+    {% endif %}
+  </p>
   <form method="get">
     <p>
       <label for="name">Name</label>
@@ -23,7 +29,11 @@
   <ul>
     {% for repository in repositories %}
       <li>
-        <a href="{% url 'repository_detail' repository.owner.username repository.name %}">{{ repository.full_name }}</a>
+        {% if repository.organization_id %}
+          <a href="{% url 'organization_repository_detail' repository.organization.name repository.name %}">{{ repository.full_name }}</a>
+        {% else %}
+          <a href="{% url 'repository_detail' repository.owner.username repository.name %}">{{ repository.full_name }}</a>
+        {% endif %}
         ({{ repository.visibility }})
       </li>
     {% empty %}
