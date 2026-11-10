@@ -19,6 +19,14 @@ from registry.repository_views import (
     tag_create,
     tag_delete,
 )
+from registry.team_views import (
+    team_add_member,
+    team_create,
+    team_detail,
+    team_edit,
+    team_list,
+    team_permission,
+)
 from registry.views import (
     change_password,
     create_administrator,
@@ -50,6 +58,28 @@ urlpatterns = [
         "organizations/<str:name>/deactivate/",
         organization_deactivate,
         name="organization_deactivate",
+    ),
+    path("organizations/<str:name>/teams/", team_list, name="team_list"),
+    path("organizations/<str:name>/teams/new/", team_create, name="team_create"),
+    path(
+        "organizations/<str:name>/teams/<str:team_name>/",
+        team_detail,
+        name="team_detail",
+    ),
+    path(
+        "organizations/<str:name>/teams/<str:team_name>/edit/",
+        team_edit,
+        name="team_edit",
+    ),
+    path(
+        "organizations/<str:name>/teams/<str:team_name>/members/",
+        team_add_member,
+        name="team_add_member",
+    ),
+    path(
+        "organizations/<str:name>/teams/<str:team_name>/permissions/",
+        team_permission,
+        name="team_permission",
     ),
     path("users/<str:username>/", profile, name="profile"),
     path("repositories/", repository_list, name="repository_list"),

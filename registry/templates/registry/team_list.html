@@ -1,0 +1,20 @@
+{% extends "registry/base.html" %}
+
+{% block title %}Teams of {{ organization.name }}{% endblock %}
+
+{% block content %}
+  <h1>Teams of {{ organization.name }}</h1>
+  {% if is_owner %}
+    <p><a href="{% url 'team_create' organization.name %}">New team</a></p>
+  {% endif %}
+  <ul>
+    {% for team in teams %}
+      <li>
+        <a href="{% url 'team_detail' organization.name team.name %}">{{ team.name }}</a>
+        - {{ team.description }}
+      </li>
+    {% empty %}
+      <li>No teams.</li>
+    {% endfor %}
+  </ul>
+{% endblock %}

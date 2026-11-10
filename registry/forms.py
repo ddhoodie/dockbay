@@ -5,7 +5,7 @@ from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 
-from registry.models import Organization, Repository, Tag
+from registry.models import Organization, Repository, Tag, Team, TeamRepositoryPermission
 from registry.search import search_ordinary_users
 
 
@@ -127,6 +127,67 @@ class OrganizationMemberForm(forms.Form):
         return user
 
 
+class TeamForm(forms.ModelForm):
+    class Meta:
+        model = Team
+        fields = ["name", "description"]
+        labels = {"name": "Name", "description": "Description"}
+
+    def __init__(self, organization, *args, **kwargs):
+        self.organization = organization
+        super().__init__(*args, **kwargs)
+        self.instance.organization = organization
+
+    def clean_name(self):
+        name = self.cleaned_data["name"]
+        teams = Team.objects.filter(organization=self.organization, name=name)
+        if self.instance.pk:
+            teams = teams.exclude(pk=self.instance.pk)
+        if teams.exists():
+            raise ValidationError("This organization already has a team with this name.")
+        return name
+
+
+class TeamMemberForm(forms.Form):
+    user = forms.ModelChoiceField(queryset=get_user_model().objects.none())
+
+    def __init__(self, team, *args, **kwargs):
+        self.team = team
+        super().__init__(*args, **kwargs)
+        self.fields["user"].queryset = team.organization.members.filter(
+            is_active=True,
+            is_staff=False,
+            is_superuser=False,
+        ).exclude(teams=team).order_by("username")
+
+    def save(self):
+        user = self.cleaned_data["user"]
+        self.team.members.add(user)
+        return user
+
+
+class TeamRepositoryPermissionForm(forms.ModelForm):
+    class Meta:
+        model = TeamRepositoryPermission
+        fields = ["repository", "access"]
+        labels = {"repository": "Repository", "access": "Access"}
+
+    def __init__(self, team, *args, **kwargs):
+        self.team = team
+        super().__init__(*args, **kwargs)
+        self.fields["repository"].queryset = Repository.objects.filter(
+            organization=team.organization,
+        )
+
+    def save(self):
+        permission, _created = TeamRepositoryPermission.objects.update_or_create(
+            team=self.team,
+            repository=self.cleaned_data["repository"],
+            defaults={"access": self.cleaned_data["access"]},
+        )
+        return permission
+
+
 class RepositoryCreateForm(forms.ModelForm):
     class Meta:
         model = Repository
@@ -140,6 +201,7 @@ class RepositoryCreateForm(forms.ModelForm):
     def __init__(self, owner, *args, **kwargs):
         self.owner = owner
         super().__init__(*args, **kwargs)
+        self.instance.owner = owner
 
     def clean_name(self):
         name = self.cleaned_data["name"]

@@ -41,7 +41,7 @@ class Team {
   description : String
 }
 
-class TeamAccess {
+class TeamRepositoryPermission {
   level : AccessLevel
 }
 
@@ -77,7 +77,7 @@ Organization "0..1" --> "0..*" Repository : organization owner
 Repository "1" *-- "0..*" Tag
 
 Team "0..*" -- "0..*" Repository
-(Team, Repository) .. TeamAccess
+(Team, Repository) .. TeamRepositoryPermission
 
 User "0..*" -- "0..*" Repository : stars
 
@@ -98,11 +98,18 @@ note bottom of User
 end note
 
 note bottom of Team
+  Names are unique within an organization.
   Every team member is already
   a member of the team's organization.
   read: view the repository.
   write: push a tag and delete tags.
   admin: manage the repository.
+end note
+
+note bottom of TeamRepositoryPermission
+  One row per team and repository.
+  The team and repository belong
+  to the same organization.
 end note
 
 @enduml

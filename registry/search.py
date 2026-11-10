@@ -20,6 +20,7 @@ def search_ordinary_users(query):
 def search_public_repositories(query, badge=""):
     repositories = Repository.objects.filter(
         visibility=Repository.Visibility.PUBLIC,
+        owner__isnull=False,
     ).select_related("owner")
     if badge == "official":
         repositories = repositories.filter(official=True)
