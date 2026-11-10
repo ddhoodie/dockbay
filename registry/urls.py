@@ -2,6 +2,14 @@ from django.contrib.auth.views import LogoutView
 from django.urls import path
 
 from registry.explore_views import explore
+from registry.organization_views import (
+    organization_create,
+    organization_deactivate,
+    organization_detail,
+    organization_list,
+    organization_members,
+    organization_settings,
+)
 from registry.repository_views import (
     repository_create,
     repository_delete,
@@ -25,6 +33,24 @@ from registry.views import (
 urlpatterns = [
     path("", home, name="home"),
     path("explore/", explore, name="explore"),
+    path("organizations/", organization_list, name="organization_list"),
+    path("organizations/new/", organization_create, name="organization_create"),
+    path("organizations/<str:name>/", organization_detail, name="organization_detail"),
+    path(
+        "organizations/<str:name>/settings/",
+        organization_settings,
+        name="organization_settings",
+    ),
+    path(
+        "organizations/<str:name>/members/",
+        organization_members,
+        name="organization_members",
+    ),
+    path(
+        "organizations/<str:name>/deactivate/",
+        organization_deactivate,
+        name="organization_deactivate",
+    ),
     path("users/<str:username>/", profile, name="profile"),
     path("repositories/", repository_list, name="repository_list"),
     path("repositories/new/", repository_create, name="repository_create"),

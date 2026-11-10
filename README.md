@@ -27,6 +27,8 @@ py manage.py runserver
 
 Običan nalog se pravi na http://127.0.0.1:8000/register/. Taj nalog nije administrator.
 
+Organizacione slike se čuvaju u lokalnom `media/` direktorijumu, koji razvojni server služi samo kada je uključen `DEBUG`.
+
 Pri prvom `migrate` nastaje nalog `superadmin`. Lozinka je u `superadmin_password.txt` u korenu projekta. Pri prvoj prijavi mora da se promeni. Dok se ne promeni, ostale stranice su zatvorene. Posle promene, samo taj nalog može da doda drugog administratora na http://127.0.0.1:8000/administrators/new/
 
 Health provera: http://127.0.0.1:8000/health/

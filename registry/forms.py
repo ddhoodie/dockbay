@@ -5,7 +5,8 @@ from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 
-from registry.models import Repository, Tag
+from registry.models import Organization, Repository, Tag
+from registry.search import search_ordinary_users
 
 
 class UsernamePasswordForm(forms.Form):
@@ -79,6 +80,51 @@ class RegisterForm(UsernamePasswordForm):
         if password and confirmation and password != confirmation:
             self.add_error("password_confirmation", "Passwords do not match.")
         return cleaned
+
+
+class OrganizationCreateForm(forms.ModelForm):
+    class Meta:
+        model = Organization
+        fields = ["name", "description", "image"]
+        labels = {
+            "name": "Name",
+            "description": "Description",
+            "image": "Image",
+        }
+
+    def __init__(self, owner, *args, **kwargs):
+        self.owner = owner
+        super().__init__(*args, **kwargs)
+
+    def save(self, commit=True):
+        organization = super().save(commit=False)
+        organization.owner = self.owner
+        if commit:
+            organization.save()
+        return organization
+
+
+class OrganizationSettingsForm(forms.ModelForm):
+    class Meta:
+        model = Organization
+        fields = ["description", "image"]
+        labels = {"description": "Description", "image": "Image"}
+
+
+class OrganizationMemberForm(forms.Form):
+    user = forms.ModelChoiceField(queryset=get_user_model().objects.none())
+
+    def __init__(self, organization, *args, **kwargs):
+        self.organization = organization
+        super().__init__(*args, **kwargs)
+        self.fields["user"].queryset = search_ordinary_users("").filter(
+            is_active=True,
+        ).exclude(organizations=organization)
+
+    def save(self):
+        user = self.cleaned_data["user"]
+        self.organization.members.add(user)
+        return user
 
 
 class RepositoryCreateForm(forms.ModelForm):
