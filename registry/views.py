@@ -4,9 +4,15 @@ from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm
 from django.http import HttpResponse, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
 
-from registry.forms import CreateAdministratorForm, ProfileForm, RegisterForm
+from registry.forms import (
+    BadgeAssignmentForm,
+    CreateAdministratorForm,
+    ProfileForm,
+    RegisterForm,
+)
 from registry.health import health_status
 from registry.models import User
+from registry.search import search_ordinary_users
 
 
 def health(request):
@@ -91,6 +97,30 @@ def create_administrator(request):
         request,
         "registry/create_administrator.html",
         {"form": form, "created": created},
+    )
+
+
+@login_required
+def user_badges(request):
+    if not (request.user.is_staff or request.user.is_superuser):
+        return HttpResponseForbidden("Only administrators can assign user badges.")
+
+    query = request.GET.get("q", request.POST.get("q", "")).strip()
+    form = BadgeAssignmentForm(request.POST or None)
+    assigned = False
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        form = BadgeAssignmentForm()
+        assigned = True
+    return render(
+        request,
+        "registry/user_badges.html",
+        {
+            "users": search_ordinary_users(query),
+            "query": query,
+            "form": form,
+            "assigned": assigned,
+        },
     )
 
 

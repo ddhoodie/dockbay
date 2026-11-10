@@ -19,6 +19,7 @@ from registry.views import (
     login_view,
     profile,
     register,
+    user_badges,
 )
 
 urlpatterns = [
@@ -54,4 +55,5 @@ urlpatterns = [
     path("logout/", LogoutView.as_view(next_page="login"), name="logout"),
     path("password/change/", change_password, name="change_password"),
     path("administrators/new/", create_administrator, name="create_administrator"),
+    path("administrators/users/", user_badges, name="user_badges"),
 ]

@@ -42,6 +42,30 @@ class CreateAdministratorForm(UsernamePasswordForm):
     pass
 
 
+class BadgeAssignmentForm(forms.Form):
+    BADGES = (
+        ("verified_publisher", "Verified Publisher"),
+        ("sponsored_oss", "Sponsored OSS"),
+    )
+
+    user = forms.ModelChoiceField(queryset=get_user_model().objects.none())
+    badge = forms.ChoiceField(choices=BADGES)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["user"].queryset = get_user_model().objects.filter(
+            is_staff=False,
+            is_superuser=False,
+        )
+
+    def save(self):
+        user = self.cleaned_data["user"]
+        badge = self.cleaned_data["badge"]
+        setattr(user, badge, True)
+        user.save(update_fields=[badge])
+        return user
+
+
 class RegisterForm(UsernamePasswordForm):
     password_confirmation = forms.CharField(
         widget=forms.PasswordInput,

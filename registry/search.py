@@ -1,12 +1,20 @@
 from django.db.models import Case, IntegerField, Q, Value, When
 
-from registry.models import Repository
+from registry.models import Repository, User
 
 BADGE_FILTERS = {
     "official": "Docker Official Image",
     "verified": "Verified Publisher",
     "sponsored": "Sponsored OSS",
 }
+
+
+def search_ordinary_users(query):
+    users = User.objects.filter(is_staff=False, is_superuser=False)
+    query = query.strip()
+    if query:
+        users = users.filter(username__icontains=query)
+    return users.order_by("username")
 
 
 def search_public_repositories(query, badge=""):
