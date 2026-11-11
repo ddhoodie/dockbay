@@ -176,10 +176,20 @@ class Repository(models.Model):
         constraints = [
             models.CheckConstraint(
                 condition=(
-                    models.Q(owner__isnull=False, organization__isnull=True)
-                    | models.Q(owner__isnull=True, organization__isnull=False)
+                    models.Q(
+                        official=True,
+                        owner__isnull=True,
+                        organization__isnull=True,
+                    )
+                    | (
+                        models.Q(official=False)
+                        & (
+                            models.Q(owner__isnull=False, organization__isnull=True)
+                            | models.Q(owner__isnull=True, organization__isnull=False)
+                        )
+                    )
                 ),
-                name="repository_has_exactly_one_owner",
+                name="repository_owner_matches_official_flag",
             ),
             models.UniqueConstraint(
                 fields=["owner", "name"],
@@ -191,11 +201,20 @@ class Repository(models.Model):
                 name="unique_repository_name_per_organization",
                 condition=models.Q(organization__isnull=False),
             ),
+            models.UniqueConstraint(
+                fields=["name"],
+                name="unique_official_repository_name",
+                condition=models.Q(official=True),
+            ),
         ]
         ordering = ["name"]
 
     def clean(self):
         super().clean()
+        if self.official:
+            if self.owner_id is not None or self.organization_id is not None:
+                raise ValidationError("An official repository has no user or organization owner.")
+            return
         if (self.owner_id is None) == (self.organization_id is None):
             raise ValidationError("A repository must have exactly one user or organization owner.")
 
@@ -204,8 +223,92 @@ class Repository(models.Model):
 
     @property
     def full_name(self):
+        if self.official:
+            return self.name
         namespace = self.owner.username if self.owner_id else self.organization.name
         return f"{namespace}/{self.name}"
+
+    def get_absolute_url(self):
+        from django.urls import reverse
+
+        if self.official:
+            return reverse("official_repository_detail", kwargs={"name": self.name})
+        if self.organization_id:
+            return reverse(
+                "organization_repository_detail",
+                kwargs={"name": self.organization.name, "repository_name": self.name},
+            )
+        return reverse(
+            "repository_detail",
+            kwargs={"username": self.owner.username, "name": self.name},
+        )
+
+    def get_settings_url(self):
+        from django.urls import reverse
+
+        if self.official:
+            return reverse("official_repository_settings", kwargs={"name": self.name})
+        if self.organization_id:
+            return reverse(
+                "organization_repository_settings",
+                kwargs={"name": self.organization.name, "repository_name": self.name},
+            )
+        return reverse(
+            "repository_settings",
+            kwargs={"username": self.owner.username, "name": self.name},
+        )
+
+    def get_delete_url(self):
+        from django.urls import reverse
+
+        if self.official:
+            return reverse("official_repository_delete", kwargs={"name": self.name})
+        if self.organization_id:
+            return reverse(
+                "organization_repository_delete",
+                kwargs={"name": self.organization.name, "repository_name": self.name},
+            )
+        return reverse(
+            "repository_delete",
+            kwargs={"username": self.owner.username, "name": self.name},
+        )
+
+    def get_tag_create_url(self):
+        from django.urls import reverse
+
+        if self.official:
+            return reverse("official_tag_create", kwargs={"name": self.name})
+        if self.organization_id:
+            return reverse(
+                "organization_tag_create",
+                kwargs={"name": self.organization.name, "repository_name": self.name},
+            )
+        return reverse(
+            "tag_create",
+            kwargs={"username": self.owner.username, "name": self.name},
+        )
+
+    def get_tag_delete_url(self, tag_name):
+        from django.urls import reverse
+
+        if self.official:
+            return reverse(
+                "official_tag_delete",
+                kwargs={"name": self.name, "tag": tag_name},
+            )
+        if self.organization_id:
+            return reverse(
+                "organization_tag_delete",
+                kwargs={
+                    "name": self.organization.name,
+                    "repository_name": self.name,
+                    "tag": tag_name,
+                },
+            )
+        return reverse(
+            "tag_delete",
+            kwargs={"username": self.owner.username, "name": self.name, "tag": tag_name},
+        )
 
     @property
     def star_count(self):
@@ -316,3 +419,6 @@ class Tag(models.Model):
 
     def __str__(self):
         return f"{self.repository.full_name}:{self.name}"
+
+    def get_delete_url(self):
+        return self.repository.get_tag_delete_url(self.name)

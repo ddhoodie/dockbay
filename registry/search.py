@@ -22,7 +22,7 @@ def search_public_repositories(query, badge=""):
     repositories = Repository.objects.filter(
         visibility=Repository.Visibility.PUBLIC,
     ).select_related("owner", "organization").annotate(
-        namespace=Coalesce("owner__username", "organization__name"),
+        namespace=Coalesce("owner__username", "organization__name", "name"),
     )
     if badge == "official":
         repositories = repositories.filter(official=True)

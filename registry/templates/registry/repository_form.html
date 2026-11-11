@@ -1,9 +1,9 @@
 {% extends "registry/base.html" %}
 
-{% block title %}New repository{% endblock %}
+{% block title %}{% if official %}New official repository{% else %}New repository{% endif %}{% endblock %}
 
 {% block content %}
-  <h1>New repository</h1>
+  <h1>{% if official %}New official repository{% else %}New repository{% endif %}</h1>
   <form method="post">
     {% csrf_token %}
     {{ form.as_p }}

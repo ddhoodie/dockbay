@@ -11,21 +11,12 @@
     <p>{{ badge }}</p>
   {% endfor %}
   {% if can_admin %}
-    {% if repository.organization_id %}
-      <p><a href="{% url 'organization_repository_settings' repository.organization.name repository.name %}">Settings</a></p>
-      <p><a href="{% url 'organization_repository_delete' repository.organization.name repository.name %}">Delete</a></p>
-    {% else %}
-      <p><a href="{% url 'repository_settings' repository.owner.username repository.name %}">Settings</a></p>
-      <p><a href="{% url 'repository_delete' repository.owner.username repository.name %}">Delete</a></p>
-    {% endif %}
+    <p><a href="{{ repository.get_settings_url }}">Settings</a></p>
+    <p><a href="{{ repository.get_delete_url }}">Delete</a></p>
   {% endif %}
   <h2>Tags</h2>
   {% if can_write %}
-    {% if repository.organization_id %}
-      <p><a href="{% url 'organization_tag_create' repository.organization.name repository.name %}">New push</a></p>
-    {% else %}
-      <p><a href="{% url 'tag_create' repository.owner.username repository.name %}">New push</a></p>
-    {% endif %}
+    <p><a href="{{ repository.get_tag_create_url }}">New push</a></p>
   {% endif %}
   <form method="get">
     <p>
@@ -48,11 +39,7 @@
         by {{ tag.author }}
         <time datetime="{{ tag.created_at|date:'c' }}">{{ tag.created_at|date:"Y-m-d H:i" }}</time>
         {% if can_write %}
-          {% if repository.organization_id %}
-            <a href="{% url 'organization_tag_delete' repository.organization.name repository.name tag.name %}">Delete</a>
-          {% else %}
-            <a href="{% url 'tag_delete' repository.owner.username repository.name tag.name %}">Delete</a>
-          {% endif %}
+          <a href="{{ tag.get_delete_url }}">Delete</a>
         {% endif %}
       </li>
     {% empty %}
