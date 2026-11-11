@@ -33,7 +33,7 @@ class User {
 class Organization {
   name : String
   description : String
-  image : Image
+  image : String
 }
 
 class Team {
@@ -42,7 +42,7 @@ class Team {
 }
 
 class TeamRepositoryPermission {
-  level : AccessLevel
+  access : AccessLevel
 }
 
 class Repository {
@@ -64,8 +64,10 @@ User "0..*" -- "0..*" Organization : member
 note bottom of Organization
   The name is globally unique.
   The owner is always also a member.
+  image is the stored image file.
   Deleting the owner deletes the organization.
-  Deleting the organization removes its memberships.
+  Deleting the organization removes its members,
+  teams, and repositories.
 end note
 
 Organization "1" *-- "0..*" Team
@@ -83,6 +85,7 @@ User "0..*" -- "0..*" Repository : stars
 
 note bottom of Repository
   Exactly one owner: a User or an Organization.
+  The name is unique for that owner.
   An official repository has no name prefix.
   official = true means the Docker Official Image badge.
   Deleting a repository deletes its tags.
