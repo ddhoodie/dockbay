@@ -246,6 +246,36 @@ class OrganizationRepositoryCreateForm(forms.ModelForm):
         return repository
 
 
+class OfficialRepositoryCreateForm(forms.ModelForm):
+    class Meta:
+        model = Repository
+        fields = ["name", "description", "visibility"]
+        labels = {
+            "name": "Name",
+            "description": "Description",
+            "visibility": "Visibility",
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.instance.official = True
+
+    def clean_name(self):
+        name = self.cleaned_data["name"]
+        if Repository.objects.filter(official=True, name=name).exists():
+            raise ValidationError("An official repository with this name already exists.")
+        return name
+
+    def save(self, commit=True):
+        repository = super().save(commit=False)
+        repository.official = True
+        repository.owner = None
+        repository.organization = None
+        if commit:
+            repository.save()
+        return repository
+
+
 class RepositorySettingsForm(forms.ModelForm):
     class Meta:
         model = Repository

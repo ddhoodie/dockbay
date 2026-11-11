@@ -1,9 +1,11 @@
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
+from django.db.models import Q
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 
 from registry.forms import (
+    OfficialRepositoryCreateForm,
     OrganizationRepositoryCreateForm,
     RepositoryCreateForm,
     RepositorySettingsForm,
@@ -11,11 +13,15 @@ from registry.forms import (
 )
 from registry.models import Repository, Tag, TeamRepositoryPermission, has_repository_access
 from registry.organization_views import _member_organization
+from registry.roles import is_administrator
 
 
 @login_required
 def repository_list(request):
-    repositories = Repository.objects.filter(owner=request.user)
+    query = Q(owner=request.user)
+    if is_administrator(request.user):
+        query |= Q(official=True)
+    repositories = Repository.objects.filter(query).select_related("owner", "organization")
     name = request.GET.get("name", "").strip()
     visibility = request.GET.get("visibility", "")
     if name:
@@ -38,8 +44,23 @@ def repository_create(request):
     form = RepositoryCreateForm(request.user, request.POST or None)
     if request.method == "POST" and form.is_valid():
         repository = form.save()
-        return redirect("repository_detail", username=request.user.username, name=repository.name)
+        return redirect(repository.get_absolute_url())
     return render(request, "registry/repository_form.html", {"form": form})
+
+
+@login_required
+def official_repository_create(request):
+    if not is_administrator(request.user):
+        raise PermissionDenied("Only administrators can create an official repository.")
+    form = OfficialRepositoryCreateForm(request.POST or None)
+    if request.method == "POST" and form.is_valid():
+        repository = form.save()
+        return redirect(repository.get_absolute_url())
+    return render(
+        request,
+        "registry/repository_form.html",
+        {"form": form, "official": True},
+    )
 
 
 def repository_detail(request, username, name):
@@ -130,7 +151,7 @@ def tag_create(request, username, name):
     form = TagPushForm(repository, request.POST or None)
     if request.method == "POST" and form.is_valid():
         form.save()
-        return redirect("repository_detail", username=username, name=repository.name)
+        return redirect(repository.get_absolute_url())
     return render(request, "registry/tag_form.html", {"form": form, "repository": repository})
 
 
@@ -140,7 +161,7 @@ def tag_delete(request, username, name, tag):
     image_tag = get_object_or_404(Tag, repository=repository, name=tag)
     if request.method == "POST":
         image_tag.delete()
-        return redirect("repository_detail", username=username, name=repository.name)
+        return redirect(repository.get_absolute_url())
     return render(
         request,
         "registry/tag_delete.html",
@@ -154,7 +175,7 @@ def repository_settings(request, username, name):
     form = RepositorySettingsForm(request.POST or None, instance=repository)
     if request.method == "POST" and form.is_valid():
         form.save()
-        return redirect("repository_detail", username=username, name=repository.name)
+        return redirect(repository.get_absolute_url())
     return render(
         request,
         "registry/repository_settings.html",
@@ -165,6 +186,58 @@ def repository_settings(request, username, name):
 @login_required
 def repository_delete(request, username, name):
     repository = _owned_repository(request, username, name)
+    if request.method == "POST":
+        repository.delete()
+        return redirect("repository_list")
+    return render(request, "registry/repository_delete.html", {"repository": repository})
+
+
+def official_repository_detail(request, name):
+    repository = _visible_official_repository(request, name)
+    return _render_repository_detail(request, repository)
+
+
+@login_required
+def official_tag_create(request, name):
+    repository = _changeable_official_repository(request, name)
+    form = TagPushForm(repository, request.POST or None)
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        return redirect(repository.get_absolute_url())
+    return render(request, "registry/tag_form.html", {"form": form, "repository": repository})
+
+
+@login_required
+def official_tag_delete(request, name, tag):
+    repository = _changeable_official_repository(request, name)
+    image_tag = get_object_or_404(Tag, repository=repository, name=tag)
+    if request.method == "POST":
+        image_tag.delete()
+        return redirect(repository.get_absolute_url())
+    return render(
+        request,
+        "registry/tag_delete.html",
+        {"repository": repository, "tag": image_tag},
+    )
+
+
+@login_required
+def official_repository_settings(request, name):
+    repository = _changeable_official_repository(request, name)
+    form = RepositorySettingsForm(request.POST or None, instance=repository)
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        return redirect(repository.get_absolute_url())
+    return render(
+        request,
+        "registry/repository_settings.html",
+        {"form": form, "repository": repository},
+    )
+
+
+@login_required
+def official_repository_delete(request, name):
+    repository = _changeable_official_repository(request, name)
     if request.method == "POST":
         repository.delete()
         return redirect("repository_list")
@@ -296,7 +369,27 @@ def _changeable_organization_repository(request, name, repository_name, minimum)
     return repository
 
 
+def _visible_official_repository(request, name):
+    repository = get_object_or_404(Repository, official=True, name=name)
+    if (
+        repository.visibility != Repository.Visibility.PUBLIC
+        and not is_administrator(request.user)
+    ):
+        raise Http404
+    return repository
+
+
+def _changeable_official_repository(request, name):
+    repository = _visible_official_repository(request, name)
+    if not is_administrator(request.user):
+        raise PermissionDenied("Only administrators can change an official repository.")
+    return repository
+
+
 def _repository_capabilities(user, repository):
+    if repository.official:
+        admin = is_administrator(user)
+        return admin, admin
     if repository.owner_id:
         is_owner = repository.owner_id == user.id
         return is_owner, is_owner

@@ -11,6 +11,12 @@ from registry.organization_views import (
     organization_settings,
 )
 from registry.repository_views import (
+    official_repository_create,
+    official_repository_delete,
+    official_repository_detail,
+    official_repository_settings,
+    official_tag_create,
+    official_tag_delete,
     organization_repository_create,
     organization_repository_delete,
     organization_repository_detail,
@@ -126,6 +132,28 @@ urlpatterns = [
     path("users/<str:username>/", profile, name="profile"),
     path("repositories/", repository_list, name="repository_list"),
     path("repositories/new/", repository_create, name="repository_create"),
+    path("official/new/", official_repository_create, name="official_repository_create"),
+    path("official/<str:name>/", official_repository_detail, name="official_repository_detail"),
+    path(
+        "official/<str:name>/settings/",
+        official_repository_settings,
+        name="official_repository_settings",
+    ),
+    path(
+        "official/<str:name>/delete/",
+        official_repository_delete,
+        name="official_repository_delete",
+    ),
+    path(
+        "official/<str:name>/tags/new/",
+        official_tag_create,
+        name="official_tag_create",
+    ),
+    path(
+        "official/<str:name>/tags/<str:tag>/delete/",
+        official_tag_delete,
+        name="official_tag_delete",
+    ),
     path("repositories/<str:username>/<str:name>/", repository_detail, name="repository_detail"),
     path(
         "repositories/<str:username>/<str:name>/settings/",

@@ -77,15 +77,17 @@ class PublicSearchTests(TestCase):
         self.assertLess(names.index("ana/api"), names.index("bob/api"))
 
     def test_badge_filter_keeps_only_public_repositories_with_that_badge(self):
-        exact = Repository.objects.get(owner=self.ana, name="api")
-        exact.official = True
-        exact.save()
+        Repository.objects.create(
+            name="python",
+            description="The Python image.",
+            visibility=Repository.Visibility.PUBLIC,
+            official=True,
+        )
         self.milan.verified_publisher = True
         self.milan.save()
         self.luka.sponsored_oss = True
         self.luka.save()
         Repository.objects.create(
-            owner=self.milan,
             name="secret",
             description="Official but private.",
             visibility=Repository.Visibility.PRIVATE,
@@ -96,7 +98,7 @@ class PublicSearchTests(TestCase):
         verified = [repository.full_name for repository in search_public_repositories("", "verified")]
         sponsored = [repository.full_name for repository in search_public_repositories("", "sponsored")]
 
-        self.assertEqual(official, ["ana/api"])
+        self.assertEqual(official, ["python"])
         self.assertEqual(verified, ["milan/api-gateway"])
         self.assertEqual(sponsored, ["luka/web"])
 
@@ -109,6 +111,11 @@ class ExplorePageTests(TestCase):
             owner=self.ana,
             name="api",
             description="An exact image.",
+            visibility=Repository.Visibility.PUBLIC,
+        )
+        self.official = Repository.objects.create(
+            name="python",
+            description="The Python image.",
             visibility=Repository.Visibility.PUBLIC,
             official=True,
         )
@@ -123,7 +130,6 @@ class ExplorePageTests(TestCase):
     def test_anonymous_visitor_searches_sorts_and_opens_a_public_repository(self):
         listed = self.client.get("/explore/", {"q": "api"})
         self.assertContains(listed, "ana/api")
-        self.assertContains(listed, "Docker Official Image")
         self.assertNotContains(listed, "milan/api")
         self.assertNotContains(listed, "Hidden private api.")
 
@@ -131,9 +137,16 @@ class ExplorePageTests(TestCase):
         self.assertContains(detail, "An exact image.")
         self.assertContains(detail, "ana/api:latest")
         self.assertContains(detail, "Stars: 0")
-        self.assertContains(detail, "Docker Official Image")
         self.assertNotContains(detail, "New push")
         self.assertEqual(self.client.get("/repositories/milan/api/").status_code, 404)
+
+        official = self.client.get("/explore/", {"q": "python"})
+        self.assertContains(official, "python")
+        self.assertContains(official, "Docker Official Image")
+        self.assertContains(official, 'href="/official/python/"')
+        official_detail = self.client.get("/official/python/")
+        self.assertContains(official_detail, "Docker Official Image")
+        self.assertNotContains(official_detail, "New push")
 
     def test_badge_filter_hides_a_public_repository_without_that_badge(self):
         Repository.objects.create(
@@ -145,5 +158,6 @@ class ExplorePageTests(TestCase):
 
         response = self.client.get("/explore/", {"badge": "official"})
 
-        self.assertContains(response, "ana/api")
+        self.assertContains(response, "python")
         self.assertNotContains(response, "ana/web")
+        self.assertNotContains(response, "ana/api")
