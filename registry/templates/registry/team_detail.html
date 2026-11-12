@@ -1,0 +1,45 @@
+{% extends "registry/base.html" %}
+
+{% block title %}{{ team.name }}{% endblock %}
+
+{% block content %}
+  <h1>{{ team.name }}</h1>
+  <p>{{ team.description }}</p>
+  {% if is_owner %}
+    <p><a href="{% url 'team_edit' organization.name team.name %}">Edit</a></p>
+  {% endif %}
+
+  <h2>Members</h2>
+  <ul>
+    {% for member in members %}
+      <li>{{ member.username }}</li>
+    {% empty %}
+      <li>No members.</li>
+    {% endfor %}
+  </ul>
+  {% if is_owner %}
+    <h3>Add a member</h3>
+    <form method="post" action="{% url 'team_add_member' organization.name team.name %}">
+      {% csrf_token %}
+      {{ member_form.as_p }}
+      <button type="submit">Add</button>
+    </form>
+  {% endif %}
+
+  <h2>Repository permissions</h2>
+  <ul>
+    {% for permission in permissions %}
+      <li>{{ permission.repository.full_name }}: {{ permission.get_access_display }}</li>
+    {% empty %}
+      <li>No repository permissions.</li>
+    {% endfor %}
+  </ul>
+  {% if is_owner %}
+    <h3>Assign repository access</h3>
+    <form method="post" action="{% url 'team_permission' organization.name team.name %}">
+      {% csrf_token %}
+      {{ permission_form.as_p }}
+      <button type="submit">Assign</button>
+    </form>
+  {% endif %}
+{% endblock %}

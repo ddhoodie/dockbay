@@ -1,0 +1,17 @@
+{% extends "registry/base.html" %}
+
+{% block title %}{{ organization.name }}{% endblock %}
+
+{% block content %}
+  <h1>{{ organization.name }}</h1>
+  <img src="{{ organization.image.url }}" alt="{{ organization.name }} organization image">
+  <p>{{ organization.description }}</p>
+  <p>Owner: {{ organization.owner.username }}</p>
+  <p><a href="{% url 'organization_members' organization.name %}">Members</a></p>
+  <p><a href="{% url 'organization_repository_list' organization.name %}">Repositories</a></p>
+  <p><a href="{% url 'team_list' organization.name %}">Teams</a></p>
+  {% if organization.owner_id == user.id %}
+    <p><a href="{% url 'organization_settings' organization.name %}">Settings</a></p>
+    <p><a href="{% url 'organization_deactivate' organization.name %}">Deactivate</a></p>
+  {% endif %}
+{% endblock %}

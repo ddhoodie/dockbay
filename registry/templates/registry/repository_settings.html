@@ -1,0 +1,12 @@
+{% extends "registry/base.html" %}
+
+{% block title %}Settings{% endblock %}
+
+{% block content %}
+  <h1>Settings for {{ repository.full_name }}</h1>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Save</button>
+  </form>
+{% endblock %}

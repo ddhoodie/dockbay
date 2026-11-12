@@ -1,0 +1,15 @@
+{% extends "registry/base.html" %}
+
+{% block title %}New administrator{% endblock %}
+
+{% block content %}
+  <h1>New administrator</h1>
+  {% if created %}
+    <p>Administrator added.</p>
+  {% endif %}
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Add</button>
+  </form>
+{% endblock %}

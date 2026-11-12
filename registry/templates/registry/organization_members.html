@@ -1,0 +1,37 @@
+{% extends "registry/base.html" %}
+
+{% block title %}Members of {{ organization.name }}{% endblock %}
+
+{% block content %}
+  <h1>Members of {{ organization.name }}</h1>
+  <ul>
+    {% for member in members %}
+      <li>{{ member.username }}{% if member == organization.owner %} (owner){% endif %}</li>
+    {% endfor %}
+  </ul>
+  {% if is_owner %}
+    <h2>Add a member</h2>
+    <form method="get">
+      <p>
+        <label for="q">Username</label>
+        <input id="q" name="q" value="{{ query }}">
+      </p>
+      <button type="submit">Search</button>
+    </form>
+    {{ form.user.errors }}
+    <ul>
+      {% for candidate in candidates %}
+        <li>
+          {{ candidate.username }}
+          <form method="post" style="display: inline">
+            {% csrf_token %}
+            <input type="hidden" name="user" value="{{ candidate.pk }}">
+            <button type="submit">Add</button>
+          </form>
+        </li>
+      {% empty %}
+        <li>No users.</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+{% endblock %}

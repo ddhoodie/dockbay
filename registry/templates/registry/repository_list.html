@@ -1,0 +1,42 @@
+{% extends "registry/base.html" %}
+
+{% block title %}{% if organization %}{{ organization.name }} repositories{% else %}Repositories{% endif %}{% endblock %}
+
+{% block content %}
+  <h1>{% if organization %}{{ organization.name }} repositories{% else %}Repositories{% endif %}</h1>
+  <p>
+    {% if organization %}
+      <a href="{% url 'organization_repository_create' organization.name %}">New repository</a>
+    {% else %}
+      <a href="{% url 'repository_create' %}">New repository</a>
+      {% if user.is_staff or user.is_superuser %}
+        <a href="{% url 'official_repository_create' %}">New official repository</a>
+      {% endif %}
+    {% endif %}
+  </p>
+  <form method="get">
+    <p>
+      <label for="name">Name</label>
+      <input id="name" name="name" value="{{ name }}">
+    </p>
+    <p>
+      <label for="visibility">Visibility</label>
+      <select id="visibility" name="visibility">
+        <option value="">All</option>
+        <option value="public" {% if visibility == "public" %}selected{% endif %}>Public</option>
+        <option value="private" {% if visibility == "private" %}selected{% endif %}>Private</option>
+      </select>
+    </p>
+    <button type="submit">Filter</button>
+  </form>
+  <ul>
+    {% for repository in repositories %}
+      <li>
+        <a href="{{ repository.get_absolute_url }}">{{ repository.full_name }}</a>
+        ({{ repository.visibility }})
+      </li>
+    {% empty %}
+      <li>No repositories.</li>
+    {% endfor %}
+  </ul>
+{% endblock %}

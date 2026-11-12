@@ -1,0 +1,12 @@
+{% extends "registry/base.html" %}
+
+{% block title %}Delete {{ repository.full_name }}:{{ tag.name }}{% endblock %}
+
+{% block content %}
+  <h1>Delete {{ repository.full_name }}:{{ tag.name }}</h1>
+  <p>This deletes the tag.</p>
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit">Delete</button>
+  </form>
+{% endblock %}

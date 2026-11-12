@@ -1,0 +1,13 @@
+{% extends "registry/base.html" %}
+
+{% block title %}New push{% endblock %}
+
+{% block content %}
+  <h1>New push</h1>
+  <p>{{ repository.full_name }}</p>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Push</button>
+  </form>
+{% endblock %}

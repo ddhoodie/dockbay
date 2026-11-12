@@ -1,0 +1,12 @@
+{% extends "registry/base.html" %}
+
+{% block title %}Deactivate {{ organization.name }}{% endblock %}
+
+{% block content %}
+  <h1>Deactivate {{ organization.name }}</h1>
+  <p>This permanently removes the organization, its members, repositories, and image.</p>
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit">Deactivate</button>
+  </form>
+{% endblock %}

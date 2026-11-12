@@ -1,0 +1,49 @@
+{% extends "registry/base.html" %}
+
+{% block title %}{{ repository.full_name }}{% endblock %}
+
+{% block content %}
+  <h1>{{ repository.full_name }}</h1>
+  <p>{{ repository.description }}</p>
+  <p>Visibility: {{ repository.visibility }}</p>
+  <p>Stars: {{ repository.star_count }}</p>
+  {% for badge in repository.badges %}
+    <p>{{ badge }}</p>
+  {% endfor %}
+  {% if can_admin %}
+    <p><a href="{{ repository.get_settings_url }}">Settings</a></p>
+    <p><a href="{{ repository.get_delete_url }}">Delete</a></p>
+  {% endif %}
+  <h2>Tags</h2>
+  {% if can_write %}
+    <p><a href="{{ repository.get_tag_create_url }}">New push</a></p>
+  {% endif %}
+  <form method="get">
+    <p>
+      <label for="tag-name">Name</label>
+      <input id="tag-name" name="name" value="{{ name }}">
+    </p>
+    <p>
+      <label for="sort">Sort</label>
+      <select id="sort" name="sort">
+        <option value="name" {% if sort == "name" %}selected{% endif %}>Name</option>
+        <option value="created" {% if sort == "created" %}selected{% endif %}>Newest</option>
+      </select>
+    </p>
+    <button type="submit">Apply</button>
+  </form>
+  <ul>
+    {% for tag in tags %}
+      <li>
+        {{ repository.full_name }}:{{ tag.name }}
+        by {{ tag.author }}
+        <time datetime="{{ tag.created_at|date:'c' }}">{{ tag.created_at|date:"Y-m-d H:i" }}</time>
+        {% if can_write %}
+          <a href="{{ tag.get_delete_url }}">Delete</a>
+        {% endif %}
+      </li>
+    {% empty %}
+      <li>No tags.</li>
+    {% endfor %}
+  </ul>
+{% endblock %}
