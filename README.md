@@ -35,8 +35,12 @@ Health provera: http://127.0.0.1:8000/health/
 
 ## Logovi
 
-Operativni ishodi HTTP zahteva zapisuju se u `dockbay.log` u korenu projekta. Putanja se po potrebi menja promenljivom okruženja `DOCKBAY_LOG_FILE`.
+Operativni ishodi HTTP zahteva zapisuju se u `dockbay.log` u korenu projekta. Putanja se po potrebi menja promenljivom okruženja `DOCKBAY_LOG_FILE`. Elasticsearch adresa se podešava promenljivom `ELASTICSEARCH_URL` (podrazumevano `http://localhost:9200`).
 
-Svaki red sadrži vreme, nivo, logger, metod, putanju bez query parametara i status, na primer: `2026-11-13T10:15:22+0000 INFO dockbay.requests request completed method=GET path=/health/ status=200`. `*.log` datoteke Git ignoriše; Elasticsearch i administratorska pretraga logova su odvojene funkcionalnosti.
+Svaki red sadrži vreme, nivo, logger, metod, putanju bez query parametara i status, na primer: `2026-11-13T10:15:22+0000 INFO dockbay.requests request completed method=GET path=/health/ status=200`. `*.log` datoteke Git ignoriše.
+
+Proces za periodično slanje novih redova u Elasticsearch mora da radi uz veb-aplikaciju: `python manage.py ship_logs`. Jedan ciklus za ručnu proveru pokreće se komandom `python manage.py ship_logs --once`. Pozicija uspešno poslatog paketa čuva se u Git-ignorisanoj checkpoint datoteci uz log.
+
+Administratori pretražuju logove na http://127.0.0.1:8000/administrators/logs/. Upit prihvata nivoe `info`, `warning` i `error`, običnu reč, frazu u navodnicima, `word:error` za rezervisanu reč, stroge granice `before:<timezone-aware-ISO-8601>` i `after:<timezone-aware-ISO-8601>`, kao i operatore `NOT`, `AND`, `OR` i zagrade (tim redosledom prioriteta). Primer: `(warning OR error) AND "error occured"`. Vremenski primer: `error AND after:2026-11-13T10:00:00+01:00`.
 
 Testovi se pokreću i na svakom pull requestu ka `develop` (`.github/workflows/pr-develop.yml`). Lokalno i u CI aplikacija koristi SQLite jer je `UKS_TEST_DB` podrazumevano `ON`.

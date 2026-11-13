@@ -45,6 +45,7 @@ from registry.views import (
     create_administrator,
     health,
     home,
+    log_search,
     login_view,
     profile,
     register,
@@ -182,4 +183,5 @@ urlpatterns = [
     path("password/change/", change_password, name="change_password"),
     path("administrators/new/", create_administrator, name="create_administrator"),
     path("administrators/users/", user_badges, name="user_badges"),
+    path("administrators/logs/", log_search, name="log_search"),
 ]
