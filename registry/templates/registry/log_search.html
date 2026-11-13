@@ -1,0 +1,49 @@
+{% extends "registry/base.html" %}
+
+{% block title %}Log search{% endblock %}
+
+{% block content %}
+  <h1>Log search</h1>
+  <form method="get">
+    {{ form.as_p }}
+    <button type="submit">Search</button>
+  </form>
+  <p>
+    Use <code>info</code>, <code>warning</code>, or <code>error</code> for levels;
+    bare words for message words; quoted text for a message phrase; and
+    <code>word:error</code> to search for a reserved level word in the message.
+    Strict time bounds use <code>before:&lt;timezone-aware-ISO-8601&gt;</code> or
+    <code>after:&lt;timezone-aware-ISO-8601&gt;</code>. Combine criteria with
+    <code>NOT</code>, <code>AND</code>, <code>OR</code>, and parentheses, in that
+    precedence order. Example: <code>(warning OR error) AND "error occured"</code>.
+  </p>
+  {% if unavailable %}
+    <p>Log search is temporarily unavailable.</p>
+  {% endif %}
+  {% if results %}
+    <table>
+      <thead>
+        <tr>
+          <th>Timestamp</th>
+          <th>Level</th>
+          <th>Logger</th>
+          <th>Message</th>
+          <th>Score</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for result in results %}
+          <tr>
+            <td>{{ result.timestamp }}</td>
+            <td>{{ result.level }}</td>
+            <td>{{ result.logger }}</td>
+            <td>{{ result.message }}</td>
+            <td>{{ result.score|default_if_none:"" }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% elif request.GET and form.is_valid and not unavailable %}
+    <p>No logs matched.</p>
+  {% endif %}
+{% endblock %}

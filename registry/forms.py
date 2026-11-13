@@ -5,6 +5,7 @@ from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 
+from registry.logs import LogQueryError, build_elasticsearch_query
 from registry.models import Organization, Repository, Tag, Team, TeamRepositoryPermission
 from registry.search import search_ordinary_users
 
@@ -41,6 +42,18 @@ class ProfileForm(forms.ModelForm):
 
 class CreateAdministratorForm(UsernamePasswordForm):
     pass
+
+
+class LogSearchForm(forms.Form):
+    query = forms.CharField(max_length=500, label="Query")
+
+    def clean_query(self):
+        query = self.cleaned_data["query"].strip()
+        try:
+            self.elasticsearch_query = build_elasticsearch_query(query)
+        except LogQueryError as error:
+            raise ValidationError(str(error)) from None
+        return query
 
 
 class BadgeAssignmentForm(forms.Form):

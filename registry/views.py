@@ -7,11 +7,14 @@ from django.shortcuts import get_object_or_404, redirect, render
 from registry.forms import (
     BadgeAssignmentForm,
     CreateAdministratorForm,
+    LogSearchForm,
     ProfileForm,
     RegisterForm,
 )
 from registry.health import health_status
+from registry.logs import LogSearchUnavailable, search_logs
 from registry.models import User
+from registry.roles import is_administrator
 from registry.search import search_ordinary_users
 
 
@@ -121,6 +124,26 @@ def user_badges(request):
             "form": form,
             "assigned": assigned,
         },
+    )
+
+
+@login_required
+def log_search(request):
+    if not is_administrator(request.user):
+        return HttpResponseForbidden("Only administrators can search application logs.")
+
+    form = LogSearchForm(request.GET or None)
+    results = []
+    unavailable = False
+    if request.GET and form.is_valid():
+        try:
+            results = search_logs(form.elasticsearch_query)
+        except LogSearchUnavailable:
+            unavailable = True
+    return render(
+        request,
+        "registry/log_search.html",
+        {"form": form, "results": results, "unavailable": unavailable},
     )
 
 

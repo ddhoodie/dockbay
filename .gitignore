@@ -7,6 +7,7 @@ db.sqlite3
 superadmin_password.txt
 .env
 *.log
+*.checkpoint
 .idea/
 .vscode/
 .coverage

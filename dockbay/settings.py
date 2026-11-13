@@ -67,6 +67,9 @@ DOCKBAY_LOG_FILE = Path(
         os.devnull if SKIP_SUPERADMIN_BOOTSTRAP else BASE_DIR / "dockbay.log",
     )
 )
+DOCKBAY_LOG_CHECKPOINT = Path(f"{DOCKBAY_LOG_FILE}.checkpoint")
+ELASTICSEARCH_URL = os.environ.get("ELASTICSEARCH_URL", "http://localhost:9200")
+ELASTICSEARCH_LOG_INDEX = "dockbay-logs"
 
 LOGGING = {
     "version": 1,
