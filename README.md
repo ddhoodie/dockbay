@@ -33,4 +33,10 @@ Pri prvom `migrate` nastaje nalog `superadmin`. Lozinka je u `superadmin_passwor
 
 Health provera: http://127.0.0.1:8000/health/
 
+## Logovi
+
+Operativni ishodi HTTP zahteva zapisuju se u `dockbay.log` u korenu projekta. Putanja se po potrebi menja promenljivom okruženja `DOCKBAY_LOG_FILE`.
+
+Svaki red sadrži vreme, nivo, logger, metod, putanju bez query parametara i status, na primer: `2026-11-13T10:15:22+0000 INFO dockbay.requests request completed method=GET path=/health/ status=200`. `*.log` datoteke Git ignoriše; Elasticsearch i administratorska pretraga logova su odvojene funkcionalnosti.
+
 Testovi se pokreću i na svakom pull requestu ka `develop` (`.github/workflows/pr-develop.yml`). Lokalno i u CI aplikacija koristi SQLite jer je `UKS_TEST_DB` podrazumevano `ON`.
