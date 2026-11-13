@@ -44,6 +44,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'registry.middleware.RequestLoggingMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -60,6 +61,41 @@ LOGIN_URL = "login"
 LOGOUT_REDIRECT_URL = "login"
 SUPERADMIN_PASSWORD_FILE = BASE_DIR / "superadmin_password.txt"
 SKIP_SUPERADMIN_BOOTSTRAP = "test" in sys.argv
+DOCKBAY_LOG_FILE = Path(
+    os.environ.get(
+        "DOCKBAY_LOG_FILE",
+        os.devnull if SKIP_SUPERADMIN_BOOTSTRAP else BASE_DIR / "dockbay.log",
+    )
+)
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "application": {
+            "format": "{asctime} {levelname} {name} {message}",
+            "style": "{",
+            "datefmt": "%Y-%m-%dT%H:%M:%S%z",
+        },
+    },
+    "handlers": {
+        "application_file": {
+            "class": "logging.FileHandler",
+            "filename": DOCKBAY_LOG_FILE,
+            "level": "INFO",
+            "formatter": "application",
+            "encoding": "utf-8",
+            "delay": True,
+        },
+    },
+    "loggers": {
+        "dockbay.requests": {
+            "handlers": ["application_file"],
+            "level": "INFO",
+            "propagate": False,
+        },
+    },
+}
 
 TEMPLATES = [
     {
