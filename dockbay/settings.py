@@ -27,8 +27,7 @@ SECRET_KEY = 'django-insecure-^nz94g$b437ch*=#_+hmdxlazi@_^c5=!(@=_ozt$v-ul$a3ps
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1,web").split(",")
 
 # Application definition
 
@@ -124,11 +123,16 @@ WSGI_APPLICATION = 'dockbay.wsgi.application'
 
 # UKS_TEST_DB=ON uses SQLite. CI always sets this. Production compose leaves it unset
 # and the app talks to PostgreSQL in the db container.
-if os.environ.get("UKS_TEST_DB", "ON") == "ON":
+if os.environ.get("UKS_TEST_DB") == "ON":
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
             'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
         }
     }
 else:
@@ -140,6 +144,12 @@ else:
             'PASSWORD': os.environ.get('POSTGRES_PASSWORD', 'dockbay'),
             'HOST': os.environ.get('POSTGRES_HOST', 'db'),
             'PORT': os.environ.get('POSTGRES_PORT', '5432'),
+        }
+    }
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+            'LOCATION': os.environ.get('REDIS_URL', 'redis://redis:6379/1'),
         }
     }
 
@@ -179,6 +189,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
