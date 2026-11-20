@@ -123,7 +123,7 @@ WSGI_APPLICATION = 'dockbay.wsgi.application'
 
 # UKS_TEST_DB=ON uses SQLite. CI always sets this. Production compose leaves it unset
 # and the app talks to PostgreSQL in the db container.
-if os.environ.get("UKS_TEST_DB", "ON") == "ON":
+if os.environ.get("UKS_TEST_DB") == "ON":
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',

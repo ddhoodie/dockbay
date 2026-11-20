@@ -22,3 +22,7 @@ class DatabaseChoiceTest(SimpleTestCase):
                 settings.DATABASES["default"]["ENGINE"],
                 "django.db.backends.postgresql",
             )
+
+    class DatabaseChoiceTest(SimpleTestCase):
+        def tearDown(self):
+            importlib.reload(settings)

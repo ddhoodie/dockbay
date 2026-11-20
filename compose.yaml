@@ -23,6 +23,8 @@ services:
     image: postgres:16-alpine
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432" #development only
     environment:
       - POSTGRES_DB=dockbay
       - POSTGRES_USER=dockbay
