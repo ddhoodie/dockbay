@@ -3,6 +3,7 @@ from django.core.exceptions import PermissionDenied
 from django.db.models import Q
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
+from django.views.decorators.http import require_POST
 
 from registry.forms import (
     OfficialRepositoryCreateForm,
@@ -131,6 +132,10 @@ def _render_repository_detail(request, repository):
         sort = "name"
         tags = tags.order_by("name")
     can_write, can_admin = _repository_capabilities(request.user, repository)
+    has_starred = (
+        request.user.is_authenticated
+        and repository.starred_by.filter(pk=request.user.pk).exists()
+    )
     return render(
         request,
         "registry/repository_detail.html",
@@ -141,7 +146,37 @@ def _render_repository_detail(request, repository):
             "sort": sort,
             "can_write": can_write,
             "can_admin": can_admin,
+            "can_star": can_star_repository(request.user, repository),
+            "has_starred": has_starred,
         },
+    )
+
+
+@login_required
+@require_POST
+def repository_star(request, repository_id):
+    repository = get_object_or_404(
+        Repository.objects.select_related("owner", "organization"),
+        pk=repository_id,
+        visibility=Repository.Visibility.PUBLIC,
+    )
+    if not can_star_repository(request.user, repository):
+        raise PermissionDenied("You cannot star this repository.")
+    repository.starred_by.add(request.user)
+    return redirect(repository.get_absolute_url())
+
+
+def can_star_repository(user, repository):
+    if (
+        not user.is_authenticated
+        or is_administrator(user)
+        or repository.visibility != Repository.Visibility.PUBLIC
+        or repository.owner_id == user.id
+    ):
+        return False
+    return not (
+        repository.organization_id
+        and repository.organization.members.filter(pk=user.pk).exists()
     )
 
 

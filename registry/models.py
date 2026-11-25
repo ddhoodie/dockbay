@@ -171,6 +171,11 @@ class Repository(models.Model):
     description = models.CharField(max_length=255)
     visibility = models.CharField(max_length=7, choices=Visibility.choices)
     official = models.BooleanField(default=False)
+    starred_by = models.ManyToManyField(
+        User,
+        related_name="starred_repositories",
+        blank=True,
+    )
 
     class Meta:
         constraints = [
@@ -312,7 +317,7 @@ class Repository(models.Model):
 
     @property
     def star_count(self):
-        return 0
+        return self.starred_by.count()
 
     @property
     def badges(self):
