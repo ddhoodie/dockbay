@@ -28,6 +28,7 @@ from registry.repository_views import (
     repository_delete,
     repository_detail,
     repository_list,
+    repository_star,
     repository_settings,
     tag_create,
     tag_delete,
@@ -133,6 +134,11 @@ urlpatterns = [
     path("users/<str:username>/", profile, name="profile"),
     path("repositories/", repository_list, name="repository_list"),
     path("repositories/new/", repository_create, name="repository_create"),
+    path(
+        "repositories/<int:repository_id>/star/",
+        repository_star,
+        name="repository_star",
+    ),
     path("official/new/", official_repository_create, name="official_repository_create"),
     path("official/<str:name>/", official_repository_detail, name="official_repository_detail"),
     path(

@@ -15,4 +15,12 @@
     <p>Email: {{ subject.email }}</p>
     <p>Bio: {{ subject.bio }}</p>
   {% endif %}
+  <h2>Starred repositories</h2>
+  <ul>
+    {% for repository in starred_repositories %}
+      <li><a href="{{ repository.get_absolute_url }}">{{ repository.full_name }}</a></li>
+    {% empty %}
+      <li>No starred repositories.</li>
+    {% endfor %}
+  </ul>
 {% endblock %}

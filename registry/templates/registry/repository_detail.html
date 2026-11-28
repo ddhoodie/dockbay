@@ -7,6 +7,14 @@
   <p>{{ repository.description }}</p>
   <p>Visibility: {{ repository.visibility }}</p>
   <p>Stars: {{ repository.star_count }}</p>
+  {% if can_star and not has_starred %}
+    <form method="post" action="{% url 'repository_star' repository.id %}">
+      {% csrf_token %}
+      <button type="submit">Star</button>
+    </form>
+  {% elif has_starred %}
+    <p>Starred</p>
+  {% endif %}
   {% for badge in repository.badges %}
     <p>{{ badge }}</p>
   {% endfor %}

@@ -13,7 +13,7 @@ from registry.forms import (
 )
 from registry.health import health_status
 from registry.logs import LogSearchUnavailable, search_logs
-from registry.models import User
+from registry.models import Repository, User
 from registry.roles import is_administrator
 from registry.search import search_ordinary_users
 
@@ -29,6 +29,9 @@ def home(request):
 @login_required
 def profile(request, username):
     subject = get_object_or_404(User, username=username)
+    starred_repositories = subject.starred_repositories.filter(
+        visibility=Repository.Visibility.PUBLIC
+    ).select_related("owner", "organization")
     if request.method == "POST" and request.user != subject:
         return HttpResponseForbidden("You can edit only your own profile.")
 
@@ -39,7 +42,12 @@ def profile(request, username):
     return render(
         request,
         "registry/profile.html",
-        {"subject": subject, "form": form, "can_edit": request.user == subject},
+        {
+            "subject": subject,
+            "form": form,
+            "can_edit": request.user == subject,
+            "starred_repositories": starred_repositories,
+        },
     )
 
 
